@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(45deg, #ff6f61, #deff8a, #61a3ff);
+            background-size: 300% 300%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px #000000;
+        }
+
+        .turn-indicator {
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px #000000;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .cell:hover {
+            transform: scale(1.1);
+            background-color: #f0f0f0;
+        }
+
+        #restartButton {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #ffffff;
+            background-color: #61a3ff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        #restartButton:hover {
+            background-color: #5194e3;
+        }
+
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #message {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        @media (max-width: 500px) {
+            .board {
+                grid-template-columns: repeat(3, 80px);
+                grid-template-rows: repeat(3, 80px);
+            }
+
+            .cell {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .turn-indicator {
+                font-size: 1.2em;
+            }
+
+            #restartButton {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 50% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        <div id="turnIndicator" class="turn-indicator">Player X's Turn</div>
+        <div class="board" id="board">
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+            <div class="cell" data-cell style="width: 100px; height: 100px;"></div>
+        </div>
+        <button id="restartButton" style="padding: 10px 20px; font-size: 1em; color: #ffffff; background-color: #61a3ff; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease;">Restart</button>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;">
+        <div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <span class="close" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <p id="message" style="font-size: 1.5em; font-weight: bold; color: #333;"></p>
+        </div>
+    </div>
+
+    <script>
+        const X_CLASS = 'x';
+        const CIRCLE_CLASS = 'circle';
+        const WINNING_COMBINATIONS = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        const cellElements = document.querySelectorAll('[data-cell]');
+        const board = document.getElementById('board');
+        const restartButton = document.getElementById('restartButton');
+        const modal = document.getElementById('modal');
+        const closeModal = document.getElementsByClassName('close')[0];
+        const messageElement = document.getElementById('message');
+        const turnIndicator = document.getElementById('turnIndicator');
+        let circleTurn;
+
+        startGame();
+
+        restartButton.addEventListener('click', startGame);
+        closeModal.addEventListener('click', closePopup);
+
+        function startGame() {
+            circleTurn = false;
+            cellElements.forEach(cell => {
+                cell.classList.remove(X_CLASS);
+                cell.classList.remove(CIRCLE_CLASS);
+                cell.textContent = ''; // Clear the text content as well
+                cell.removeEventListener('click', handleClick);
+                cell.addEventListener('click', handleClick, { once: true });
+            });
+            setBoardHoverClass();
+            setTurnIndicator();
+            closePopup();
+        }
+
+        function handleClick(e) {
+            const cell = e.target;
+            const currentClass = circleTurn ? CIRCLE_CLASS : X_CLASS;
+            placeMark(cell, currentClass);
+            if (checkWin(currentClass)) {
+                endGame(false);
+            } else if (isDraw()) {
+                endGame(true);
+            } else {
+                swapTurns();
+                setBoardHoverClass();
+                setTurnIndicator();
+            }
+        }
+
+        function endGame(draw) {
+            if (draw) {
+                messageElement.textContent = "It's a Draw!";
+                startGame();
+            } else {
+                messageElement.textContent = `${circleTurn ? "O's" : "X's"} Win!`;
+                startGame();
+            }
+            openPopup();
+        }
+
+        function isDraw() {
+            return [...cellElements].every(cell => {
+                return cell.classList.contains(X_CLASS) || cell.classList.contains(CIRCLE_CLASS);
+            });
+        }
+
+        function placeMark(cell, currentClass) {
+            cell.classList.add(currentClass);
+            cell.textContent = currentClass === X_CLASS ? 'X' : 'O';
+        }
+
+        function swapTurns() {
+            circleTurn = !circleTurn;
+        }
+
+        function setBoardHoverClass() {
+            board.classList.remove(X_CLASS);
+            board.classList.remove(CIRCLE_CLASS);
+            if (circleTurn) {
+                board.classList.add(CIRCLE_CLASS);
+            } else {
+                board.classList.add(X_CLASS);
+            }
+        }
+
+        function setTurnIndicator() {
+            turnIndicator.textContent = `${circleTurn ? "Player O's" : "Player X's"} Turn`;
+        }
+
+        function checkWin(currentClass) {
+            return WINNING_COMBINATIONS.some(combination => {
+                return combination.every(index => {
+                    return cellElements[index].classList.contains(currentClass);
+                });
+            });
+        }
+
+        function openPopup() {
+            modal.style.display = 'flex';
+        }
+
+        function closePopup() {
+            modal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
